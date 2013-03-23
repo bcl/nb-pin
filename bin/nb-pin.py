@@ -9,8 +9,9 @@ import sys
 import os
 import requests
 import argparse
-import shlex
 import stat
+
+debug = False
 
 class Pinboard(object):
     API = "https://api.pinboard.in/v1/"
@@ -51,7 +52,15 @@ class Pinboard(object):
         payload["shared"] = "yes" if shared else "no"
         payload["toread"] = "yes" if toread else "no"
 
-        print payload
+        if debug:
+            print(payload)
+
+        try:
+            r = requests.get(self.API+"posts/add", params=payload)
+            if r.status_code != 200:
+                print("ERROR: Status code %s for %s" % (r.status_code, payload))
+        except Exception as e:
+            print("ERROR for %s: %s" % (payload, e))
 
 
 def setup_argparse():
@@ -63,6 +72,7 @@ def setup_argparse():
     parser.add_argument("-r", "--replace", help="Replace an existing URL", action="store_true")
     parser.add_argument("-s", "--shared", help="Share the URL publicly", action="store_true")
     parser.add_argument("-l", "--later", help="Read later", action="store_true")
+    parser.add_argument("-d", "--debug", help="Turn on debugging output", action="store_true")
     parser.add_argument("url", help="URL to pin")
     parser.add_argument("title", help="Title of the URL")
     parser.add_argument("description", help="Description of url", nargs="?", default="")
@@ -89,12 +99,13 @@ def get_auth_token(config_file):
 
     with open(file_path, "r") as f:
         for line in f:
-            if not line or not line.strip() \
-               or line.strip().startswith("#"):
+            line = line.strip()
+            if not line or line.startswith("#"):
                 continue
             token, sep, value = line.partition("=")
             if token == "auth_token":
                 return value
+    return ""
 
 
 def main():
@@ -103,8 +114,10 @@ def main():
     """
     parser = setup_argparse()
     args = parser.parse_args()
+    debug = args.debug
 
-    print args
+    if debug:
+        print(args)
 
     # Check config mode, refuse to run if it isn't 0600
     if not os.path.exists(args.config):
@@ -122,8 +135,8 @@ def main():
         print(str(e))
         sys.exit(1)
 
-    pinboard = Pinboard(args.url, args.title, args.description, auth_token,
-                        args.tag, args.replace, args.shared, args.later)
+    Pinboard(args.url, args.title, args.description, auth_token,
+             args.tag, args.replace, args.shared, args.later)
 
 if __name__ == '__main__':
     main()
