@@ -5,8 +5,8 @@
     Copyright 2013 by Brian C. Lane
     <insert license here>
 """
-import os
 import sys
+import os
 import requests
 import argparse
 import shlex
@@ -58,14 +58,14 @@ def setup_argparse():
     """ Handle setup of the argparse options
     """
     parser = argparse.ArgumentParser(description="Pinboard Newsbeuter Bookmarks")
-    parser.add_argument("-c", "--config", help="Path to config file", default="~/.pinboard-auth")
+    parser.add_argument("-c", "--config", help="Path to config file", type=os.path.expanduser, default="~/.pinboard-auth")
     parser.add_argument("-t", "--tag", help="tag, multiple allowed", action="append") 
     parser.add_argument("-r", "--replace", help="Replace an existing URL", action="store_true")
     parser.add_argument("-s", "--shared", help="Share the URL publicly", action="store_true")
     parser.add_argument("-l", "--later", help="Read later", action="store_true")
     parser.add_argument("url", help="URL to pin")
     parser.add_argument("title", help="Title of the URL")
-    parser.add_argument("description", help="Description of url", default="")
+    parser.add_argument("description", help="Description of url", nargs="?", default="")
 
     return parser
 
