@@ -106,15 +106,24 @@ def main():
 
     print args
 
+    # Check config mode, refuse to run if it isn't 0600
+    if not os.path.exists(args.config):
+        print("ERROR: Config file %s doesn't exist" % args.config)
+        sys.exit(1)
+
+    info = os.stat(args.config)
+    if info.st_mode & (stat.S_IRWXG | stat.S_IRWXO):
+        print("ERROR: %s permissions allow others to access auth_token" % args.config)
+        sys.exit(1)
+
     try:
         auth_token = get_auth_token(args.config)
     except Exception as e:
-        sys.stderr.write(str(e)+"\n")
+        print(str(e))
         sys.exit(1)
 
     pinboard = Pinboard(args.url, args.title, args.description, auth_token,
                         args.tag, args.replace, args.shared, args.later)
-
 
 if __name__ == '__main__':
     main()
