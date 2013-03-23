@@ -97,6 +97,11 @@ def get_auth_token(config_file):
         Check permissions on the file and raise an error if it is
         accessable to anyone other than the user.
 
+        File should have a line like this:
+        auth_token=USER:BUNCHOFHEXCHARS
+
+        You can obtain your token from the password page of your pinboard.in account
+
         :param config_file: Full path to the file, supports ~ expansion
         :type config_file: string
         :raises: Exception
@@ -133,11 +138,6 @@ def main():
     # Check config mode, refuse to run if it isn't 0600
     if not os.path.exists(args.config):
         print("ERROR: Config file %s doesn't exist" % args.config)
-        sys.exit(1)
-
-    info = os.stat(args.config)
-    if info.st_mode & (stat.S_IRWXG | stat.S_IRWXO):
-        print("ERROR: %s permissions allow others to access auth_token" % args.config)
         sys.exit(1)
 
     try:
